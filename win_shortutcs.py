@@ -62,22 +62,24 @@ def transparent_taskbar():
 	except Exception as e:
 		return e
 
-def reset_taskbar():
+def reset_taskbar(transparent:bool=False, center:bool=False):
 	make_admin()
 
 	registry_key_center = r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
 	registry_key_transparent = r"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
 
 	try:
-		key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, registry_key, 0, winreg.KEY_ALL_ACCESS)
-		winreg.DeleteValue(key, "UseOLEDTaskbarTransparency")
+		if center:
+			key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, registry_key, 0, winreg.KEY_ALL_ACCESS)
+			winreg.SetValueEx(key, "TaskbarAl", 0, winreg.REG_DWORD, 1)
 
-		print("Successfully reset transparent taskbar")
+			print("Successfully reset center taskbar")
 
-		key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, registry_key, 0, winreg.KEY_ALL_ACCESS)
-		winreg.SetValueEx(key, "TaskbarAl", 0, winreg.REG_DWORD, 1)
+		if transparent:
+			key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, registry_key, 0, winreg.KEY_ALL_ACCESS)
+			winreg.DeleteValue(key, "UseOLEDTaskbarTransparency")
 
-		print("Successfully reset center taskbar")
+			print("Successfully reset transparent taskbar")
 
 	except Exception as e:
 		return e
@@ -154,7 +156,31 @@ def main():
 			input(transparent_taskbar())
 
 		elif choice == "3":
-			input(reset_taskbar())
+			reset_center = input("reset center taskbar? [y/n] >>>").lower()
+
+			if reset_center in ["y", "yes", "true"]:
+				center = True
+
+			elif reset_center not in ["n", "no", "not", "false"]:
+				print("Error, reset center taskbar set on 'False'")
+				center = False
+
+			else:
+				center = False
+
+			reset_transparent = input("reset transparent taskbar? [y/n] >>>").lower()
+
+			if reset_transparent in ["y", "yes", "true"]:
+				transparent = True
+
+			elif reset_transparent not in ["n", "no", "not", "false"]:
+				print("Error, reset transparent taskbar set on 'False'")
+				transparent = False
+
+			else:
+				transparent = False
+
+			input(reset_taskbar(center=center, transparent=transparent))
 
 		elif choice == "4":
 			type_choice = input("gif or static? >>> ").lower()
